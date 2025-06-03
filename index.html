@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Template Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 40px auto;
+      padding: 20px;
+      background: #121212;
+      color: #c0c0c0;
+      display: flex;
+      flex-direction: row;
+      gap: 60px;
+      max-width: 1200px;
+    }
+    .form-container, .preview-container {
+      flex: 1;
+      background-color: #1a1a1a;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      box-sizing: border-box;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 20px;
+      color: #cccccc;
+    }
+    select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      background-color: #1e1e1e;
+      color: #dddddd;
+      border: 1px solid #444;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      margin-right: 10px;
+      padding: 10px 20px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #2a2a2a;
+      color: #dddddd;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #3a3a3a;
+    }
+    textarea {
+      margin-top: 30px;
+      height: 300px;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    #preview {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #1e1e1e;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #cccccc;
+    }
+    #preview a {
+      color: #66aaff;
+    }
+    #preview h1, #preview h2, #preview h3, #preview h4, #preview h5, #preview h6 {
+      font-weight: 500;
+      color: #d0d0d0;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="form-container">
+    <h1>Ticket Template Generator</h1>
+
+    <label for="tool">Tool</label>
+    <select id="tool">
+      <option value="Homepage">Homepage</option>
+      <option value="Markets">Markets</option>
+      <option value="Morning Update">Morning Update</option>
+      <option value="Market Wrap">Market Wrap</option>
+      <option value="Mauldin: TFTF">Mauldin: TFTF</option>
+      <option value="Kiplinger Letters">Kiplinger Letters</option>
+      <option value="Econ Calendar">Econ Calendar</option>
+      <option value="Barry's Insights">Barry's Insights</option>
+      <option value="Real Estate Report Card">Real Estate Report Card</option>
+      <option value="Buy vs Rent">Buy vs Rent</option>
+      <option value="Appreciation">Appreciation</option>
+      <option value="House Price Index">House Price Index</option>
+      <option value="Bid over Ask">Bid over Ask</option>
+      <option value="Amortization">Amortization</option>
+      <option value="Blended Rate">Blended Rate</option>
+      <option value="Reinvestment">Reinvestment</option>
+      <option value="Loan Compare - Purchase">Loan Compare - Purchase</option>
+      <option value="Loan Compare - Refinance">Loan Compare - Refinance</option>
+      <option value="Cost of Waiting">Cost of Waiting</option>
+      <option value="Risk of Waiting">Risk of Waiting</option>
+      <option value="Equity Gained">Equity Gained</option>
+      <option value="Debt Consolidation">Debt Consolidation</option>
+      <option value="Strike Rate">Strike Rate</option>
+      <option value="Purchase Analysis">Purchase Analysis</option>
+      <option value="Buying Power">Buying Power</option>
+      <option value="Newsletter">Newsletter</option>
+      <option value="Social Share">Social Share</option>
+      <option value="Marketing Kits">Marketing Kits</option>
+      <option value="Social Studio">Social Studio</option>
+      <option value="Presentation Expressway">Presentation Expressway</option>
+      <option value="Highway Record">Highway Record</option>
+      <option value="Client Manager">Client Manager</option>
+      <option value="Admin">Admin</option>
+    </select>
+
+    <label for="environment">Environment</label>
+    <select id="environment">
+      <option value="Test">Test</option>
+      <option value="Stage">Stage</option>
+      <option value="Production">Production</option>
+    </select>
+
+    <label for="device">Device</label>
+    <select id="device">
+      <option value="Web">Web</option>
+      <option value="Mobile">Mobile</option>
+    </select>
+
+    <button onclick="generateTemplate()">Generate</button>
+    <button onclick="copyToClipboard()">Copy to Clipboard</button>
+
+    <textarea id="output" readonly></textarea>
+  </div>
+
+  <div class="preview-container">
+    <h2>Live Preview</h2>
+    <div id="preview"></div>
+  </div>
+
+  <script>
+    function generateTemplate() {
+      const tool = document.getElementById("tool").value;
+      const environment = document.getElementById("environment").value;
+      const device = document.getElementById("device").value.toLowerCase();
+
+      const categories = {
+        Updates: ["Morning Update", "Mauldin: TFTF", "Kiplinger Letters", "Econ Calendar", "Barry's Insights"],
+        "Real Estate": ["Real Estate Report Card", "Buy vs Rent", "Appreciation", "House Price Index", "Bid over Ask"],
+        Calculators: ["Amortization", "Blended Rate", "Reinvestment"],
+        "Loan Advisor": ["Loan Compare - Purchase", "Loan Compare - Refinance", "Cost of Waiting", "Risk of Waiting", "Equity Gained", "Debt Consolidation", "Strike Rate", "Purchase Analysis"],
+        Marketing: ["Buying Power", "Newsletter", "Social Share", "Marketing Kits", "Social Studio", "Presentation Expressway"]
+      };
+
+      let category = "Category";
+      for (const [cat, tools] of Object.entries(categories)) {
+        if (tools.includes(tool)) {
+          category = cat;
+          break;
+        }
+      }
+
+      const envLinkLabel = `${environment} Environment`;
+      const envLink = environment.toLowerCase();
+      const entryStep = `1. Enter the [${envLinkLabel}](https://${envLink}.mbshighway.com/).`;
+
+      let steps = "";
+      if (tool === "Homepage") {
+        steps = entryStep;
+      } else if (device === "web") {
+        steps = entryStep;
+        if (tool === "Markets") {
+        } else if (["Highway Record", "Client Manager"].includes(tool)) {
+          steps += `\n2. Hover over the **user logo** in the navbar.\n3. Click **${tool}**.`;
+        } else if (tool === "Admin") {
+          steps += `\n2. Click the **user logo**.`;
+        } else {
+          steps += `\n2. Hover over **${category}** in the navbar.\n3. Click **${tool}**.`;
+        }
+      } else {
+        steps = entryStep;
+        if (tool !== "Homepage") {
+          steps += `\n2. Tap the **hamburger icon** to expand the menu.`;
+          if (tool === "Highway Record") {
+            steps += `
+3. Tap **Speed Meeting**.
+4. Tap **${tool}**.`;
+          } else {
+            steps += `
+3. Tap **${category}**.
+4. Tap **${tool}**.`;
+          }
+        }
+      }
+
+      const preconditionLines = [];
+      if (device === "mobile") {
+        preconditionLines.push("- The user must be using a mobile device.");
+      }
+      if (categories["Loan Advisor"].includes(tool) && tool !== "Purchase Analysis") {
+        preconditionLines.push("- The user must have the Loan Advisor add-on activated.");
+      }
+      if (tool === "Social Studio") {
+        preconditionLines.push("- The user must have the Social Studio add-on activated.");
+      }
+      if (tool === "Presentation Expressway") {
+        preconditionLines.push("- The user must have the Presentation Expressway add-on activated.");
+      }
+      preconditionLines.push("- The user should already be logged in to the system.");
+
+      const preconditions = `## **Pre-conditions:**\n\n${preconditionLines.join("\n")}`;
+
+      const output = `${preconditions}\n\n## **Steps to reproduce:**\n\n${steps}\n\n## **Observations:**\n\n\n## **Expected result:**\n\n\n## **Actual result:**`;
+
+      document.getElementById("output").value = output;
+      document.getElementById("preview").innerHTML = marked.parse(output);
+    }
+
+    function copyToClipboard() {
+      const textarea = document.getElementById("output");
+      textarea.select();
+      document.execCommand("copy");
+    }
+  </script>
+</body>
+</html>
